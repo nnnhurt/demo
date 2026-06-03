@@ -1,0 +1,38 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Заказы — {{ site_name }}{% endblock %}
+
+{% block h1 %}Заказы{% endblock %}
+
+{% block content %}
+<div>
+    {% if user.is_authenticated and user.role == "admin" %}
+    <a href="{% url 'zakaz_add' %}" class="btn">Добавить заказ</a>
+    {% endif %}
+</div>
+<div>
+    {% for zakaz in zakazy %}
+    <div class="product-card">
+        <div class="details">
+            <strong>
+                {% for item in zakaz.items.all %}
+                {{ item.product.article }}
+                {% endfor %}
+            </strong><br/>
+            Пункт выдачи: {{ zakaz.punkt.adress }}<br/>
+            Клиент: {{ zakaz.client.full_name }}<br/>
+            Дата заказа: {{ zakaz.zakaz_date }}<br/>
+            Статус: {{ zakaz.get_status_display }}<br/>
+            {% if user.is_authenticated and user.role == "admin" %}
+            <a href="{% url 'zakaz_edit' zakaz.id %}">Редактировать заказ</a><br/>
+            <form method="post" action="{% url 'zakaz_delete' zakaz.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn">Удалить заказ</button>
+            </form>
+            {% endif %}
+        </div>
+        <div class="delivery">{{ zakaz.delivery_date }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

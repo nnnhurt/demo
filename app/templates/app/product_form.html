@@ -1,0 +1,16 @@
+{% extends 'app/base.html' %}
+
+{% block title %}{% if is_edit %}Редактирование{% else %}Добавление{% endif %} товара — {{ site_name }}{% endblock %}
+
+{% block h1 %}{% if is_edit %}Редактирование{% else %}Добавление{% endif %} товара{% endblock %}
+
+{% block content %}
+<div>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="btn">Сохранить</button>
+        <a href="{% url 'product_list' %}" class="btn btn-orders">Назад</a>
+    </form>
+</div>
+{% endblock %}

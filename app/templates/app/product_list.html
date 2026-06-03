@@ -1,0 +1,101 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Список товаров — {{ site_name }}{% endblock %}
+{% block h1 %}Каталог товаров{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+{% if user.role == "admin" or user.role == "manager" %}
+<div>
+    <form method="get" style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <div>
+            <label>Поиск:</label><br/>
+            <input type="text" name="search" value="{{ current_search }}" placeholder="Найти..." oninput="clearTimeout(this.delay); this.delay = setTimeout(() => this.form.submit(), 500);">
+        </div>
+
+        <div>
+            <label>Скидка:</label><br/>
+            <select name="skidka" onchange="this.form.submit()">
+                <option value="">Все</option>
+                {% for group in skidka_groups %}
+                <option value="{{ group }}" {% if current_skidka == group %}selected{% endif %}>{{ group }}%</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label>Сорт. кол-во:</label><br/>
+            <select name="sort_quantity" onchange="this.form.submit()">
+                <option value="">—</option>
+                <option value="asc" {% if current_sort_quantity == "asc" %}selected{% endif %}>По возрастанию</option>
+                <option value="desc" {% if current_sort_quantity == "desc" %}selected{% endif %}>По убыванию</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Сорт. цена:</label><br/>
+            <select name="sort_price" onchange="this.form.submit()">
+                <option value="">—</option>
+                <option value="asc" {% if current_sort_price == "asc" %}selected{% endif %}>По возрастанию</option>
+                <option value="desc" {% if current_sort_price == "desc" %}selected{% endif %}>По убыванию</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Сорт. скидка:</label><br/>
+            <select name="sort_skidka" onchange="this.form.submit()">
+                <option value="">—</option>
+                <option value="asc" {% if current_sort_skidka == "asc" %}selected{% endif %}>По возрастанию</option>
+                <option value="desc" {% if current_sort_skidka == "desc" %}selected{% endif %}>По убыванию</option>
+            </select>
+        </div>
+
+        {% if user.role == 'admin' %}
+        <div style="margin-left: auto;">
+            <a href="{% url 'product_add' %}" class="btn">Добавить товар</a>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endif %}
+{% endif %}
+<div>
+    {% for product in products %}
+    <div class="product-card{% if product.quantity == 0 %} out-of-stock{% elif product.skidka >= skidka_highlight_min %} high-discount{% endif %}">
+        {% if product.photo %}
+        <img src="{{ product.photo.url }}" class="image" alt="{{ product.name }}">
+        {% else %}
+        <img src="{% static 'images/picture.png' %}" class="image" alt="Заглушка">
+        {% endif %}
+        <div class="details">
+            <strong>{{ product.category.name }} | {{ product.name }}</strong>
+            <br/>
+            Описание товара: {{ product.description }}
+            <br/>
+            Производитель: {{ product.manufacturer.name }}
+            <br/>
+            Поставщик: {{ product.supplier.name }}
+            <br/>
+            {% if product.skidka > 0 %}
+            Цена: <span class="old-price">{{ product.price }}</span> {{ product.final_price|floatformat:2 }} руб.
+            {% else %}
+            Цена: {{ product.price }} руб.
+            {% endif %}
+            <br/>
+            Единица измерения: {{ product.unit.name }}
+            <br/>
+            Количество на складе: {{ product.quantity }}
+            {% if user.is_authenticated and user.role == 'admin' %}
+            <br/><a href="{% url 'product_edit' product.id %}">Редактировать товар</a>
+            <form method="post" action="{% url 'product_delete' product.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn">Удалить товар</button>
+            </form>
+            {% endif %}
+        </div>
+        <div class="sale">{{ product.skidka }}%</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

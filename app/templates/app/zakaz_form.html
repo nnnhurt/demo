@@ -1,0 +1,77 @@
+{% extends 'app/base.html' %}
+
+{% block title %}{% if is_edit %}Редактирование{% else %}Добавление{% endif %} заказа — {{ site_name }}{% endblock %}
+
+{% block h1 %}{% if is_edit %}Редактирование{% else %}Добавление{% endif %} заказа{% endblock %}
+
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+  {{ form }}
+
+  <p>Товары в заказе</p>
+
+  {% for formset in inlines %}
+    {{ formset.management_form }}
+
+    <div id="{{ formset.prefix }}-forms">
+      {% for f in formset.forms %}
+        <div class="order-item-form">
+          {{ f }}
+          {% if f.DELETE %}Удалить {{ f.DELETE }}{% endif %}
+          <button type="button" class="btn js-remove-item" data-prefix="{{ formset.prefix }}">Убрать</button>
+        </div>
+      {% endfor %}
+    </div>
+
+    <template id="{{ formset.prefix }}-empty-form">
+      <div class="order-item-form">
+        {{ formset.empty_form }}
+        <button type="button" class="btn js-remove-item" data-prefix="{{ formset.prefix }}">Убрать</button>
+      </div>
+    </template>
+
+    <button type="button" class="btn js-add-item" data-prefix="{{ formset.prefix }}">Добавить товар</button>
+  {% endfor %}
+
+  <button type="submit" class="btn">Сохранить</button>
+  <a href="{% url 'zakaz_list' %}" class="btn btn-orders">Назад</a>
+</form>
+
+<script>
+  document.addEventListener("click", (e) => {
+    const add = e.target.closest(".js-add-item");
+    if (add) {
+      const prefix = add.dataset.prefix;
+      const list = document.getElementById(`${prefix}-forms`);
+      const tpl = document.getElementById(`${prefix}-empty-form`);
+      const totalEl = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+      const idx = parseInt((totalEl && totalEl.value) || "0", 10);
+      const html = tpl.innerHTML.replaceAll(`${prefix}-__prefix__-`, `${prefix}-${idx}-`);
+      const wrap = document.createElement("div");
+      wrap.innerHTML = html;
+      while (wrap.firstChild) list.appendChild(wrap.firstChild);
+      if (totalEl) totalEl.value = String(idx + 1);
+      return;
+    }
+
+    const rem = e.target.closest(".js-remove-item");
+    if (rem) {
+      const prefix = rem.dataset.prefix;
+      const formEl = rem.closest(".order-item-form");
+      if (!formEl) return;
+
+      const del = formEl.querySelector('input[type="checkbox"][name^="' + prefix + '-"][name$="-DELETE"]');
+      if (del) {
+        del.checked = true;
+        formEl.style.display = "none";
+      } else {
+        formEl.remove();
+        const totalEl = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+        const total = parseInt((totalEl && totalEl.value) || "0", 10);
+        if (totalEl) totalEl.value = String(Math.max(0, total - 1));
+      }
+    }
+  });
+</script>
+{% endblock %}

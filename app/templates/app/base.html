@@ -1,0 +1,61 @@
+{% load static %}
+
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+    <link rel="icon" href="{% static 'icon.ico' %}" sizes="any">
+    <link rel="icon" type="image/png" href="{% static 'icon.png' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <img src="{% static 'icon.png' %}" alt="" class="header-logo">
+            <span>{{ site_name }}</span>
+        </div>
+        <nav class="header-nav">
+            <a href="{% url 'product_list' %}" class="btn">Продукты</a>
+            {% if user.is_authenticated %}
+            {% if user.role == "admin" or user.role == "manager" %}
+            <a href="{% url 'zakaz_list' %}" class="btn">Заказы</a>
+            {% endif %}
+            {% endif %}
+        </nav>
+        <div class="header-right">
+            {% if user.is_authenticated %}
+            <div class="user-info">
+                <span class="user-role">
+                    {% if user.role == "admin" %}Администратор
+                    {% elif user.role == "manager" %}Менеджер
+                    {% elif user.role == "client" %}Клиент
+                    {% else %}{{ user.role }}{% endif %}
+                </span>
+                <strong class="user-name">{{ user.full_name }}</strong>
+            </div>
+            <form action="{% url 'logout' %}" method="post" class="logout-form">
+                {% csrf_token %}
+                <button class="logout-button" type="submit">Выйти</button>
+            </form>
+            {% else %}
+            <div class="user-info">
+                <span class="user-role">Гость</span>
+                <a href="{% url 'login' %}">Войти</a>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>{% block h1 %}{% endblock %}</h1>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
