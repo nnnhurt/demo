@@ -1,11 +1,16 @@
 :root {
+    /* цвет карточки товара при отсутствии на складе (quantity = 0) */
     --product-card-out-of-stock-bg: grey;
+    /* цвет карточки товара при скидке >= 15% */
     --product-card-high-discount-bg: #483d8b;
+    /* цвет кнопок */
     --btn-bg: #4b0082;
+    /* цвет границы кнопок (должен быть такой же как цвет кнопок) */
     --btn-border: #4b0082;
 }
 
 body {
+    /* шрифт */
     font-family: "Arial", serif;
     margin: 0;
 }
@@ -13,7 +18,7 @@ body {
 header {
 	display: flex;
 	justify-content: space-between;
-	align-items: center
+	align-items: center;
     min-height: 72px;
     background-color: #6a5acd;
     margin: 0 0 10px;
