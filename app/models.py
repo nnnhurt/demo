@@ -1,18 +1,26 @@
-import uuid
+import secrets
+import string
 from pathlib import Path
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.files.uploadedfile import UploadedFile
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from PIL import Image
+
+
+def _photo_random_suffix(length: int = 6) -> str:
+    alphabet = string.ascii_lowercase + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 def product_photo_upload_to(instance: "Product", filename: str) -> str:
-    ext = Path(filename).suffix.lower() or ".jpg"
-    if instance.pk:
-        return f"product/{instance.pk}{ext}"
-    return f"product/{uuid.uuid4().hex}{ext}"
+    path = Path(filename)
+    ext = path.suffix.lower() or ".jpg"
+    name = path.stem.lower()
+    return f"product/{name}_{_photo_random_suffix()}{ext}"
 
 
 class User(AbstractUser):
@@ -114,28 +122,43 @@ class Product(models.Model):
         verbose_name = _("Товар")
         verbose_name_plural = _("Товары")
 
-    def save(self, *args, **kwargs):
+    def _resize_photo(self) -> None:
+        if not self.photo:
+            return
+        path = Path(self.photo.path)
+        if not path.is_file():
+            return
+        with Image.open(path) as img:
+            img.thumbnail(settings.PRODUCT_PHOTO_SIZE, Image.Resampling.LANCZOS)
+            img.save(path)
+
+    def save(self, *args, **kwargs) -> None:
         if self.photo is False:
             self.photo = None
 
-        pending_photo: UploadedFile | None = None
-        if isinstance(self.photo, UploadedFile):
-            pending_photo = self.photo
+        pending = self.photo if isinstance(self.photo, UploadedFile) else None
+        if pending:
             self.photo = None
 
         if self.pk:
             try:
                 old = Product.objects.get(pk=self.pk)
-                if old.photo and (pending_photo is not None or not self.photo):
+                if old.photo and (pending or not self.photo):
                     old.photo.delete(save=False)
             except Product.DoesNotExist:
                 pass
 
         super().save(*args, **kwargs)
 
-        if pending_photo is not None:
-            ext = Path(pending_photo.name).suffix.lower() or ".jpg"
-            self.photo.save(f"upload{ext}", pending_photo, save=True)
+        if pending:
+            self.photo.save(pending.name, pending, save=False)
+            self._resize_photo()
+            Product.objects.filter(pk=self.pk).update(photo=self.photo.name)
+
+    def delete(self, *args, **kwargs) -> None:
+        if self.photo:
+            self.photo.delete(save=False)
+        super().delete(*args, **kwargs)
 
     @property
     def final_price(self):

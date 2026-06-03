@@ -99,7 +99,9 @@ class Command(BaseCommand):
                     if product.photo:
                         product.photo.delete(save=False)
                     with photo_src.open("rb") as photo_file:
-                        product.photo.save(photo_src.name, File(photo_file), save=True)
+                        product.photo.save(photo_src.name, File(photo_file), save=False)
+                    product._resize_photo()
+                    Product.objects.filter(pk=product.pk).update(photo=product.photo.name)
 
         # users (до заказов)
         with open(os.path.join(base_path, "user_import.csv"), encoding="utf-8-sig") as f:

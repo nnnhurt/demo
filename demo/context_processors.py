@@ -1,8 +1,8 @@
 from django.conf import settings
 
 
-def site_name(request):
-    return {"site_name": settings.SITE_NAME}
+def company_name(request):
+    return {"company_name": settings.SITE_NAME}
 
 
 def get_skidka_groups() -> dict[str, tuple[int, int]]:

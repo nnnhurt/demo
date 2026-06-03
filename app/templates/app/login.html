@@ -1,9 +1,10 @@
 {% extends 'app/base.html' %}
 
-{% block title %}Авторизация — {{ site_name }}{% endblock %}
-{% block h1 %}Вход в систему{% endblock %}
+{% block title %}Вход — {{ company_name }}{% endblock %}
+{% block h1 %}{{ company_name }}{% endblock %}
 
 {% block content %}
+<p>Вход в систему</p>
 <div>
     <form method="post">
         {% csrf_token %}

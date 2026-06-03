@@ -3,8 +3,8 @@ from django.urls import path
 from app import views
 
 urlpatterns = [
-    path("", views.ProductListView.as_view(), name="product_list"),
-    path("login/", views.UserLoginView.as_view(), name="login"),
+    path("", views.UserLoginView.as_view(), name="login"),
+    path("products/", views.ProductListView.as_view(), name="product_list"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
     path("products/add/", views.ProductCreateView.as_view(), name="product_add"),
     path(

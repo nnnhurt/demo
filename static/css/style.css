@@ -127,10 +127,9 @@ header {
 }
 
 .product-card .image {
-    width: 300px;
-    height: 200px;
+    max-width: 300px;
+    max-height: 200px;
     border: 2px gray solid;
-    object-fit: cover;
 }
 
 .product-card .details {

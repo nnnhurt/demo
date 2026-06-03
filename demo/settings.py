@@ -65,7 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'demo.context_processors.site_name',
+                'demo.context_processors.company_name',
                 'demo.context_processors.skidka',
             ],
         },
@@ -147,5 +147,10 @@ SKIDKA_RANGES = [
 # название сайта
 SITE_NAME = "ООО ВелосипедДрайв"
 
+LOGIN_URL = "login"
+
 # размер скидки с которого карточка должна быть пурпурной
 SKIDKA_CARD_HIGHLIGHT_MIN = 15
+
+# макс. размер фото товара при сохранении (ширина, высота), пропорции сохраняются
+PRODUCT_PHOTO_SIZE = (300, 200)

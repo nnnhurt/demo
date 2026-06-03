@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <head>
     <meta charset="utf-8">
-    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+    <title>{% block title %}{{ company_name }}{% endblock %}</title>
     <link rel="icon" href="{% static 'icon.ico' %}" sizes="any">
     <link rel="icon" type="image/png" href="{% static 'icon.png' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -13,7 +13,7 @@
     <header>
         <div class="header-left">
             <img src="{% static 'icon.png' %}" alt="" class="header-logo">
-            <span>{{ site_name }}</span>
+            <span>{{ company_name }}</span>
         </div>
         <nav class="header-nav">
             <a href="{% url 'product_list' %}" class="btn">Продукты</a>
@@ -41,7 +41,9 @@
             {% else %}
             <div class="user-info">
                 <span class="user-role">Гость</span>
+                {% if request.resolver_match.url_name != 'login' %}
                 <a href="{% url 'login' %}">Войти</a>
+                {% endif %}
             </div>
             {% endif %}
         </div>
